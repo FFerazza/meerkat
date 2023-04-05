@@ -1,15 +1,10 @@
 import requests
 import json
 import unicodedata
-from settings import *
+import hashlib
+from settings import SCOPUS_API_KEY
 
-scopus_search_string="""TITLE-ABS-KEY("devops security") OR TITLE-ABS-KEY("devsecops") OR TITLE-ABS-KEY("secdevops")"""
-scopus_fields = "&field=title,coverDate,identifier&count=20&start="
-scopus_url="https://api.elsevier.com/content/search/scopus?query="
-research_url=  "%s%s%s"  % (scopus_url, scopus_search_string, scopus_fields)
-articles = []
-
-def get_scopus_page(search_string: str=research_url,fields: str = "&field=title,coverDate,identifier", page: int = 0) -> dict:
+def get_scopus_articles(search_string: str, starting_year: int= None, pagination_url: str = None, articles: dict = {}):
     """ Function that returns a dictionary of articles from Scopus
 
     Args:
@@ -18,31 +13,30 @@ def get_scopus_page(search_string: str=research_url,fields: str = "&field=title,
         fields (str, optional): _description_. Defaults to "&field=title,coverDate,identifier".
         page (int, optional): _description_. Defaults to 0.
     """
-    connection = requests.get(research_url+str(page*20), {"apiKey": SCOPUS_API_KEY})    
-    return json.loads(connection.text)
 
-def loop_articles_from_page(page: dict):
-    for item in page['search-results']['entry']:
-        print(item['dc:identifier'].strip('SCOPUS_ID:'))
-        print(item['dc:title'])
-        print(item['prism:coverDate'])
-        print('')
-        articles.append({"Scopus_id":item['dc:identifier'].strip('SCOPUS_ID:'),  "Title": unicodedata.normalize('NFKD',item['dc:title']), "Date": item['prism:coverDate'], "Category": ""})
-
-def get_scopus_articles():
-    """ Function that returns a dictionary of articles from Scopus
-
-    Args:
-        search_string (str, optional): _description_. Defaults to scopus_search_string.
-        max_pages (int, optional): _description_. Defaults to max_pages.
-        fields (str, optional): _description_. Defaults to "&field=title,coverDate,identifier".
-        page (int, optional): _description_. Defaults to 0.
-    """
-    page = get_scopus_page()
-    loop_articles_from_page(page)
-    pagination = int(page['search-results']['opensearch:totalResults'])/20
-    for page in range(1, int(pagination)+1):
-        page = get_scopus_page(page=page)
-        loop_articles_from_page(page)
+    scopus_url="https://api.elsevier.com/content/search/scopus?query="
+    scopus_search_string=f"""TITLE-ABS-KEY("{search_string}")"""
+    scopus_fields = "&field=title,coverDate,doi,url&count=20"
+    api_key= f"&apiKey={SCOPUS_API_KEY}"
+    research_url=  "%s%s%s%s"  % (scopus_url, scopus_search_string, scopus_fields, api_key)
+    articles = articles
+    
+    if pagination_url:
+        research_url = pagination_url
+    else :
+        research_url = research_url
+        
+    connection = requests.get(research_url)
+    print(research_url)
+    results = json.loads(connection.text)
+    for item in results['search-results']['entry']:
+        normalized_title = unicodedata.normalize('NFKD',item['dc:title']).encode()
+        title_hash = hashlib.md5(normalized_title).hexdigest()
+        print(f'Found article: {item["dc:title"]} in Scopus')
+        articles.update({item.get('prism:doi', title_hash): { "Title": unicodedata.normalize('NFKD',item['dc:title']), "Url" : item['prism:url'], "Date": item['prism:coverDate'], "Category": ""}})
+    if [item['@href'] for item in results['search-results']['link'] if item['@ref']=='next']:
+        pagination_next=[e['@href'] for e in results['search-results']['link'] if e['@ref']=='next'][0]
+        articles.update(get_scopus_articles(search_string=search_string, pagination_url=pagination_next, articles=articles))
     return articles
+
 
