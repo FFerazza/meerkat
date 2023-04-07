@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["--search", "human aspects of information security"]
+            "args": ["--search", "devsecops"]
         }
     ]
 }
