@@ -10,6 +10,7 @@ import argparse
 # this is for algorithm test purposes only
 from random import choices
 
+
 argparser = argparse.ArgumentParser()
 argparser.add_argument(
     "-s",
@@ -47,6 +48,7 @@ def gather_articles():
     merged_articles = {**scopus_articles, **springer_articles, **ieeexplore_articles}
     df = pd.DataFrame.from_dict(merged_articles, orient="index")
     df = transform_and_validate(df)
+    df["URL"] = df["URL"].apply(lambda x: f'=HYPERLINK("{x}", "{x}")') #let's make it clickable
     df.to_excel("articles.xlsx", sheet_name=f"{search_string}-articles", index=False)
     print(f"Wrote {len(scopus_articles)} articles to articles.xlsx")
 
