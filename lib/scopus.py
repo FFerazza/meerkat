@@ -7,9 +7,9 @@ from settings import SCOPUS_API_KEY
 
 def get_scopus_articles(
     search_string: str,
-    starting_year: int = None,
     pagination_url: str = None,
     articles: dict = {},
+    is_web_search: bool = False,
 ):
     """Function that returns a dictionary of articles from Scopus
 
@@ -21,7 +21,10 @@ def get_scopus_articles(
     """
 
     scopus_url = "https://api.elsevier.com/content/search/scopus?query="
-    scopus_search_string = f"""TITLE-ABS-KEY("{search_string}")"""
+    if is_web_search:
+        scopus_search_string = """%s""" % search_string
+    else:
+        scopus_search_string = f"""TITLE-ABS-KEY("{search_string}")"""
     scopus_fields = "&count=20"
     api_key = f"&apiKey={SCOPUS_API_KEY}"
     research_url = "%s%s%s%s" % (
@@ -30,7 +33,7 @@ def get_scopus_articles(
         scopus_fields,
         api_key,
     )
-    articles = articles
+    articles = {}
 
     if pagination_url:
         research_url = pagination_url

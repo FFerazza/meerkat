@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scopus Search by FF</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+    <div class="hero-area">
+        <span class="book-icon">&#128213;</span>
+        <form onsubmit="return submitForm(event)">
+            <label for="search-query">What to search:</label>
+            <input type="text" id="search-query" placeholder="Enter your search query" required>
+            <br>
+            <label for="search-option">Search in:</label>
+            <select id="search-option">
+                <option value="TITLE">TITLE</option>
+                <option value="TITLE-ABS">TITLE-ABS</option>
+                <option value="TITLE-ABS-KEY">TITLE-ABS-KEY</option>
+            </select>
+            <br>
+            <button type="submit">Search on Scopus</button>
+        </form>
+        <div class="search-info">
+            <h2>How the Search Works</h2>
+            <p>
+                The Scopus Search by FF allows you to search for academic articles and papers from the Scopus database.
+                To perform a search, follow these steps:
+            </p>
+            <ol>
+                <li>Enter your search query in the "What to search" field. You can use keywords or phrases relevant to your topic.</li>
+                <li>Select the search scope from the "Search in" dropdown menu. You can choose to search in the title, abstract, or both.</li>
+                <li>Click the "Search on Scopus" button.</li>
+            </ol>
+            <p>
+                The search supports complex queries using logical operators. For example, you can use parentheses and logical operators to create complex queries like:
+                <strong>(cyber OR security) AND (bias OR perception)</strong>. This query will find articles that contain either "cyber" or "security" in their titles or abstracts, and also contain either "bias" or "perception".
+            </p>
+        </div>
+    </div>
+
+    <!-- Modal for loading indicator -->
+    <div id="loading-modal" class="modal">
+        <div class="modal-content">
+            <div class="loader"></div>
+        </div>
+    </div>
+    <script>
+        function submitForm(event) {
+            event.preventDefault(); // Prevent form submission
+    
+            var searchQuery = document.getElementById("search-query").value;
+            if (searchQuery.trim() === "") {
+                alert("Please enter a valid search query.");
+                return false;
+            }
+    
+            var searchOption = document.getElementById("search-option").value;
+    
+            // Show the loading modal
+            var modal = document.getElementById("loading-modal");
+            modal.style.display = "block";
+    
+            // Construct the query payload
+            var payload = searchOption + "(" + searchQuery + ")";
+    
+            // AJAX call
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/query", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.responseType = "blob"; // Set the response type to Blob
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    // Hide the loading modal
+                    modal.style.display = "none";
+    
+                    if (xhr.status === 200) {
+                        var response = xhr.response;
+                        var filename = "query.xlsx"; // Set the desired file name here
+    
+                        // Create a temporary URL for the Blob
+                        var url = URL.createObjectURL(response);
+    
+                        // Create a temporary link element
+                        var link = document.createElement("a");
+                        link.href = url;
+                        link.download = filename;
+    
+                        // Programmatically click the link to trigger the download
+                        link.click();
+    
+                        // Cleanup by revoking the temporary URL
+                        URL.revokeObjectURL(url);
+                    } else {
+                        alert("An error occurred. Please try again later.");
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({ query: payload }));
+    
+            return true;
+        }
+    </script>
+    
+
+</body>
+</html>

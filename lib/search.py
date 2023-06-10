@@ -41,7 +41,6 @@ hard_validation = True
 
 
 def gather_articles():
-    starting_year = argparser.parse_args().starting_year
     scopus_articles = get_scopus_articles(search_string=search_string)
     springer_articles = get_springer_articles(search_string=search_string)
     ieeexplore_articles = {}
