@@ -1,14 +1,9 @@
 from flask import Flask, render_template, request, jsonify, make_response
 import sys , os 
 
-# Add the parent directory to the sys.path
-# Get the current directory of the script
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
-# Construct the path to the desired folder
 folder_path = os.path.abspath(os.path.join(current_dir, '..', 'lib'))
-
-# Add the folder path to sys.path
 sys.path.append(folder_path)
 
 from web_search import get_articles, create_excel
