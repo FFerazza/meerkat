@@ -1,4 +1,6 @@
 from scopus import get_scopus_articles
+from springer import get_springer_articles
+from search import transform_and_validate
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -7,7 +9,7 @@ import tempfile
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-def get_articles(scopus_query):
+def get_articles(query):
     """Function that returns a dictionary of articles from Scopus
 
     Args:
@@ -16,20 +18,15 @@ def get_articles(scopus_query):
         fields (str, optional): _description_. Defaults to "&field=title,coverDate,identifier".
         page (int, optional): _description_. Defaults to 0.
     """
-    articles = get_scopus_articles(scopus_query, is_web_search=True)
+    scopus_articles = get_scopus_articles(search_string=query, is_web_search=True)
+    springer_articles = get_springer_articles(search_string=query, is_web_search=True)
+    articles = {**scopus_articles, **springer_articles}
+    if articles == {}:
+        return pd.DataFrame()
     df = pd.DataFrame.from_dict(articles, orient="index")
-    df = transform_and_validate(df)
+    df = transform_and_validate(df, is_web_search=True)
     df["URL"] = df["URL"].apply(lambda x: f'=HYPERLINK("{x}", "{x}")') #let's make it clickable
-    df.to_excel("articles.xlsx", sheet_name=f"{scopus_query}-articles", index=False)
     return df
-
-def transform_and_validate(dataframe):
-    """Function that transforms and validates the dataframe"""
-    if dataframe.duplicated("Title").any():
-        dataframe.drop_duplicates(subset="Title", inplace=True)
-    cosine_compare(dataframe["Title"].tolist())
-    dataframe["Date"] = pd.to_datetime(dataframe["Date"]).dt.year
-    return dataframe
 
 def create_excel(df, sheet_name):
     with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as temp_file:

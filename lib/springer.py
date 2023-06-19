@@ -5,15 +5,30 @@ import unicodedata
 import hashlib
 
 
+def convert_scopus_to_springer_query(search_string):
+    groups = search_string.split(" AND ")
+    query_parts = []
+    for group in groups:
+        keywords = group.strip("()").split(" OR ")
+        title_query = " OR ".join([f"title:{keyword}" for keyword in keywords])
+        query_parts.append(f"({title_query})")
+    query = " AND ".join(query_parts)
+    return query
+
+
 def get_springer_articles(
     search_string="devsecops",
     starting_year: int = None,
     pagination_url=None,
     articles={},
+    is_web_search: bool = False,
 ) -> list[dict]:
     articles = articles
     if not pagination_url:
-        url = f'http://api.springernature.com/meta/v2/json?q=title:"{search_string}"&api_key={SPRINGER_API_KEY}'
+        if is_web_search:
+            url = f'http://api.springernature.com/meta/v2/json?q={convert_scopus_to_springer_query(search_string)}&api_key={SPRINGER_API_KEY}'
+        else:
+            url = f'http://api.springernature.com/meta/v2/json?q=title:"{search_string}"&api_key={SPRINGER_API_KEY}'
     else:
         url = f"http://api.springernature.com{pagination_url}"
     connection = requests.get(url)

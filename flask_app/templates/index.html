@@ -7,34 +7,45 @@
 </head>
 <body>
     <div class="hero-area">
-        <span class="book-icon">&#128213;</span>
+        <span class="hydra-icon"></span>
         <form onsubmit="return submitForm(event)">
             <label for="search-query">What to search:</label>
             <input type="text" id="search-query" placeholder="Enter your search query" required>
             <br>
-            <label for="search-option">Search in:</label>
-            <select id="search-option">
-                <option value="TITLE">TITLE</option>
-                <option value="TITLE-ABS">TITLE-ABS</option>
-                <option value="TITLE-ABS-KEY">TITLE-ABS-KEY</option>
-            </select>
-            <br>
-            <button type="submit">Search on Scopus</button>
+            <button type="submit">Send hydra on a search</button>
         </form>
         <div class="search-info">
-            <h2>How the Search Works</h2>
+            <h2>Please read me, do not make a fool of yourself.</h2>
             <p>
-                The Scopus Search by FF allows you to search for academic articles and papers from the Scopus database.
+                The Hydra Search allows you to search for academic articles and papers from several academic databases.
+                It will automatically search for your query in the Springer database (titles only) and the Scopus database (titles and abstracts). More databases to come.
                 To perform a search, follow these steps:
             </p>
             <ol>
-                <li>Enter your search query in the "What to search" field. You can use keywords or phrases relevant to your topic.</li>
-                <li>Select the search scope from the "Search in" dropdown menu. You can choose to search in the title, abstract, or both.</li>
-                <li>Click the "Search on Scopus" button.</li>
+                <li>Enter your search query in the "What to search" field.</li>
+                <li>Click the button to send the hydra on its quest.</li>
+                <li>Wait for the hydra to return with the results that will be automatically downloaded</li>
             </ol>
             <p>
-                The search supports complex queries using logical operators. For example, you can use parentheses and logical operators to create complex queries like:
-                <strong>(cyber OR security) AND (bias OR perception)</strong>. This query will find articles that contain either "cyber" or "security" in their titles or abstracts, and also contain either "bias" or "perception".
+                <strong> Important #1</strong> <br>
+                This search was created for querying academic literature with a single word, such as "cybersecurity", or "devsecops", or "agile".
+                If you need a more complex search, you can do that, but you should keep the logic as simple as possible and use the following boolean operators and syntax. Examples:
+                <ul>
+                <li><strong>(cyber OR security) AND (bias OR perception)</strong>. This query will find articles that contain either "cyber" or "security" in their titles or abstracts, and also contain either "bias" or "perception".</li>
+                <li><strong> (maritime) AND (security OR cybersecurity)</strong>. This query will find articles that contain "maritime" in their titles, and also contain either "security" or "cybersecurity".</li>
+                </ul>
+                If you use boolean logic, <strong>use parenthes</strong> to group terms together, even if there is only a single term next to a boolean operator, as per "(maritime)" in the above example.
+                <br>
+            </p>
+            <p>
+                <strong> Important #2</strong>
+                <br>
+                Please remember to use single or very specific word combinations to refine your search. "security" is a broad term, "cybersecurity" is a little more precise, "devsecops" is extremely specific and better.
+            </p>
+            <p>
+                <strong> Important #3</strong>
+                <br>
+                Hydra will automatically remove duplicates based on DOI, normalized title hashes, and even by running cosine similarity testing (tf-idf), however, duplicates might still appear in the final spreadsheet. Please remove them manually, for academic databases aren't always perfect.
             </p>
         </div>
     </div>
@@ -55,14 +66,12 @@
                 return false;
             }
     
-            var searchOption = document.getElementById("search-option").value;
-    
             // Show the loading modal
             var modal = document.getElementById("loading-modal");
             modal.style.display = "block";
     
             // Construct the query payload
-            var payload = searchOption + "(" + searchQuery + ")";
+            var payload = "(" + searchQuery + ")";
     
             // AJAX call
             var xhr = new XMLHttpRequest();

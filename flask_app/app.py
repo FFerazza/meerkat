@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, jsonify, make_response
-import sys , os 
+from flask import Flask, render_template, request, jsonify, make_response, abort
+import sys , os, re
 
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -7,10 +7,6 @@ folder_path = os.path.abspath(os.path.join(current_dir, '..', 'lib'))
 sys.path.append(folder_path)
 
 from web_search import get_articles, create_excel
-
-
-# Import the get_articles function from main.py
-#from main import get_articles
 
 app = Flask(__name__)
 
@@ -20,10 +16,14 @@ def index():
 
 @app.route('/query', methods=['POST'])
 def query():
-    scopus_query = request.get_json()['query']
+    query = request.get_json()['query']
+    
+    # Validate the query
+    if not query or not re.match(r'^[a-zA-Z0-9()\s]+$', query):
+        return abort(400, 'Invalid query. Only alphanumeric characters and parentheses are allowed.')
 
-    articles = get_articles(scopus_query)
-    excel_data = create_excel(articles, scopus_query)
+    articles = get_articles(query)
+    excel_data = create_excel(articles, query)
 
     # Set the appropriate headers for Excel file download
     headers = {

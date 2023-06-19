@@ -22,7 +22,7 @@ def get_scopus_articles(
 
     scopus_url = "https://api.elsevier.com/content/search/scopus?query="
     if is_web_search:
-        scopus_search_string = """%s""" % search_string
+        scopus_search_string = f"""TITLE-ABS{search_string}"""
     else:
         scopus_search_string = f"""TITLE-ABS-KEY("{search_string}")"""
     scopus_fields = "&count=20"
@@ -43,6 +43,9 @@ def get_scopus_articles(
     connection = requests.get(research_url)
     results = json.loads(connection.text)
     for item in results["search-results"]["entry"]:
+        if item.get('error'):
+            print(f'No results found for {search_string}')
+            return articles
         normalized_title = unicodedata.normalize("NFKD", item["dc:title"]).lower()
         title_hash = hashlib.md5(normalized_title.encode()).hexdigest()
         print(f'Found article: {item["dc:title"]} in Scopus')
