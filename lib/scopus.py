@@ -22,7 +22,7 @@ def get_scopus_articles(
 
     scopus_url = "https://api.elsevier.com/content/search/scopus?query="
     if is_web_search:
-        scopus_search_string = f"""TITLE-ABS{search_string}"""
+        scopus_search_string = f"""TITLE-KEY{search_string}"""
     else:
         scopus_search_string = f"""TITLE-ABS-KEY("{search_string}")"""
     scopus_fields = "&count=20"

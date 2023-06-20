@@ -2,8 +2,7 @@ Flask==2.3.2
 matplotlib==3.7.0
 openpyxl==3.1.2
 pandas==1.5.3
-# Editable install with no version control (requests==2.25.1)
--e /usr/lib/python3/dist-packages/requests-2.25.1.egg-info
+requests==2.25.1
 scikit-learn==1.2.2
 seaborn==0.12.2
 gunicorn==20.1.0
