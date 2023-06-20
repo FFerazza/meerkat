@@ -57,7 +57,7 @@
             <div class="loader"></div>
         </div>
     </div>
-    
+
 <script>
     function submitForm(event) {
         event.preventDefault(); // Prevent form submission
@@ -66,6 +66,13 @@
         if (searchQuery.trim() === "") {
             alert("Please enter a valid search query.");
             return false;
+        }
+
+        var pattern = /^[a-zA-Z0-9()]+$/;
+      
+        if (!pattern.test(searchQuery)) {
+          alert('Please enter only alphanumeric characters and parentheses.');
+          return false;
         }
 
         // Show the loading modal
