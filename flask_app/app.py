@@ -7,7 +7,7 @@ folder_path = os.path.abspath(os.path.join(current_dir, '..', 'lib'))
 sys.path.append(folder_path)
 
 from web_search import get_articles, create_excel
-from settings import *
+from settings import SITE_URL
 
 app = Flask(__name__)
 
@@ -31,6 +31,17 @@ def query():
         'Content-Disposition': f'attachment; filename="articles.xlsx"',
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     }
+    
+    # Create a response with Excel file data and headers
+    response = make_response(excel_data)
+    response.headers = headers
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Access-Control-Allow-Origin'] = SITE_URL
+    response.headers['Access-Control-Allow-Methods'] = 'POST'
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"    
 
     # Create a response with Excel file data and headers
     response = make_response(excel_data)
