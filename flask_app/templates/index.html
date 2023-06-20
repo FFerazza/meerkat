@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hydra Search</title>
+    <title>Scopus Search by FF</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
@@ -10,73 +10,105 @@
         <span class="hydra-icon"></span>
         <form onsubmit="return submitForm(event)">
             <label for="search-query">What to search:</label>
-            <input type="text" id="search-query" placeholder="Enter your search query" required pattern="[A-Za-z0-9()]*">
+            <input type="text" id="search-query" placeholder="Enter your search query" required>
             <br>
             <button type="submit">Send hydra on a search</button>
         </form>
         <div class="search-info">
-            <!-- Existing content -->
+            <h2>Please read me, do not make a fool of yourself.</h2>
+            <p>
+                The Hydra Search allows you to search for academic articles and papers from several academic databases.
+                It will automatically search for your query in the Springer database (titles only) and the Scopus database (titles and abstracts). More databases to come.
+                <br>
+                For more granular searches, please download the CLI version of Hydra from its github repository.
+            </p>
+            <p>
+                <strong> Important #1</strong>
+                <br>
+                Queries can last long, complex ones can take up to 10 minutes, third-party literature databases are slow. Please be patient, as long as the wheel spins, you're good.
+            </p>
+            <p>
+                <strong> Important #2</strong> <br>
+                This search was created for querying academic literature with a single word, such as "cybersecurity", or "devsecops", or "agile".
+                If you need a more complex search, you can do that, but you should keep the logic as simple as possible and use the following boolean operators and syntax. Examples:
+                <ul>
+                <li><strong>(cyber OR security) AND (bias OR perception)</strong>. This query will find articles that contain either "cyber" or "security" in their titles or abstracts, and also contain either "bias" or "perception".</li>
+                <li><strong> (maritime) AND (security OR cybersecurity)</strong>. This query will find articles that contain "maritime" in their titles, and also contain either "security" or "cybersecurity".</li>
+                </ul>
+                If you use boolean logic, <strong>use parenthes</strong> to group terms together, even if there is only a single term next to a boolean operator, as per "(maritime)" in the above example.
+                <br>
+            </p>
+            <p>
+                <strong> Important #3</strong>
+                <br>
+                Please remember to use <strong style="color:red;font-weight:500;"> very specific single words or word combinations </strong> to refine your search. "security" is a broad term, "cybersecurity" is a little more precise, "devsecops" is extremely specific and better.
+            </p>
+            <p>
+                <strong> Important #4</strong>
+                <br>
+                Hydra will automatically remove duplicates based on DOI, normalized title hashes, and even by running cosine similarity testing (tf-idf), however, duplicates might still appear in the final spreadsheet. Please remove them manually, for academic databases aren't always perfect.
+            </p>
         </div>
     </div>
 
-    <!-- Modal for loading indicator -->
-    <div id="loading-modal" class="modal">
-        <!-- Existing content -->
-    </div>
-    <script>
-        function submitForm(event) {
-            event.preventDefault(); // Prevent form submission
-    
-            var searchQuery = document.getElementById("search-query").value;
-            if (searchQuery.trim() === "") {
-                alert("Please enter a valid search query.");
-                return false;
-            }
-    
-            // Show the loading modal
-            var modal = document.getElementById("loading-modal");
-            modal.style.display = "block";
-    
-            // Construct the query payload
-            var payload = "(" + searchQuery + ")";
-    
-            // AJAX call
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/query", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.responseType = "blob"; // Set the response type to Blob
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    // Hide the loading modal
-                    modal.style.display = "none";
-    
-                    if (xhr.status === 200) {
-                        var response = xhr.response;
-                        var filename = "query.xlsx"; // Set the desired file name here
-    
-                        // Create a temporary URL for the Blob
-                        var url = URL.createObjectURL(response);
-    
-                        // Create a temporary link element
-                        var link = document.createElement("a");
-                        link.href = url;
-                        link.download = filename;
-    
-                        // Programmatically click the link to trigger the download
-                        link.click();
-    
-                        // Cleanup by revoking the temporary URL
-                        URL.revokeObjectURL(url);
-                    } else {
-                        alert("An error occurred. Please try again later.");
-                    }
-                }
-            };
-            xhr.send(JSON.stringify({ query: payload }));
-    
-            return true;
+<!-- Modal for loading indicator -->
+<div id="loading-modal" class="modal">
+    <!-- Existing content -->
+</div>
+<script>
+    function submitForm(event) {
+        event.preventDefault(); // Prevent form submission
+
+        var searchQuery = document.getElementById("search-query").value;
+        if (searchQuery.trim() === "") {
+            alert("Please enter a valid search query.");
+            return false;
         }
-    </script>
+
+        // Show the loading modal
+        var modal = document.getElementById("loading-modal");
+        modal.style.display = "block";
+
+        // Construct the query payload
+        var payload = "(" + searchQuery + ")";
+
+        // AJAX call
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/query", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.responseType = "blob"; // Set the response type to Blob
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                // Hide the loading modal
+                modal.style.display = "none";
+
+                if (xhr.status === 200) {
+                    var response = xhr.response;
+                    var filename = "query.xlsx"; // Set the desired file name here
+
+                    // Create a temporary URL for the Blob
+                    var url = URL.createObjectURL(response);
+
+                    // Create a temporary link element
+                    var link = document.createElement("a");
+                    link.href = url;
+                    link.download = filename;
+
+                    // Programmatically click the link to trigger the download
+                    link.click();
+
+                    // Cleanup by revoking the temporary URL
+                    URL.revokeObjectURL(url);
+                } else {
+                    alert("An error occurred. Please try again later.");
+                }
+            }
+        };
+        xhr.send(JSON.stringify({ query: payload }));
+
+        return true;
+    }
+</script>
 </body>
 </html>
 

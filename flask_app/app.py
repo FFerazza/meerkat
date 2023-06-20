@@ -7,7 +7,7 @@ folder_path = os.path.abspath(os.path.join(current_dir, '..', 'lib'))
 sys.path.append(folder_path)
 
 from web_search import get_articles, create_excel
-from settings import SITE_URL
+from settings import *
 
 app = Flask(__name__)
 
@@ -17,47 +17,26 @@ def index():
 
 @app.route('/query', methods=['POST'])
 def query():
-    try:
-        if request.headers.get('Content-Type') != 'application/json':
-            return abort(415, 'Unsupported Media Type. Only application/json is allowed.')
+    query = request.get_json()['query']
+    
+    # Validate the query
+    if not query or not re.match(r'^[a-zA-Z0-9()\s]+$', query):
+        return abort(400, 'Invalid query. Only alphanumeric characters and parentheses are allowed.')
 
-        data = request.get_json()
+    articles = get_articles(query)
+    excel_data = create_excel(articles, query)
 
-        # Validate the 'query' parameter
-        query = data.get('query')
-        if not query or not re.match(r'^[a-zA-Z0-9()\s]+$', query):
-            return abort(400, 'Invalid query. Only alphanumeric characters and parentheses are allowed.')
+    # Set the appropriate headers for Excel file download
+    headers = {
+        'Content-Disposition': f'attachment; filename="articles.xlsx"',
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    }
 
-        # Limit the input length
-        max_query_length = 100
-        if len(query) > max_query_length:
-            return abort(400, f'Query exceeds the maximum length of {max_query_length} characters.')
+    # Create a response with Excel file data and headers
+    response = make_response(excel_data)
+    response.headers = headers
 
-        # Your remaining code here...
-        articles = get_articles(query)
-        excel_data = create_excel(articles, query)
-
-        # Set the appropriate headers for Excel file download
-        headers = {
-            'Content-Disposition': f'attachment; filename="articles.xlsx"',
-            'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        }
-
-        # Create a response with Excel file data and add some headers
-        response = make_response(excel_data)
-        response.headers = headers
-        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-        response.headers['X-XSS-Protection'] = '1; mode=block'
-        response.headers['X-Content-Type-Options'] = 'nosniff'
-        response.headers['Access-Control-Allow-Origin'] = SITE_URL
-        response.headers['Access-Control-Allow-Methods'] = 'POST'
-        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
-
-        return response
-
-    except Exception as e:
-        return abort(500, 'Internal Server Error.')
+    return response
 
 @app.after_request
 def add_no_cache_headers(response):
