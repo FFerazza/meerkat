@@ -37,14 +37,17 @@ def create_excel(df, sheet_name):
         sheet = workbook[sheet_name]
         for column_cells in sheet.columns:
             max_length = 0
-            for cell in column_cells:
-                if cell.value:
-                    cell_length = len(str(cell.value))
-                    if cell_length > max_length:
-                        max_length = cell_length
-            adjusted_width = (max_length + 2) * 0.9
-            col_letter = get_column_letter(cell.column)
-            sheet.column_dimensions[col_letter].width = adjusted_width
+            if column_cells[0].value == "Title":
+                for cell in column_cells:
+                    if cell.value:
+                        cell_length = len(str(cell.value))
+                        if cell_length > max_length:
+                            max_length = cell_length
+                adjusted_width = (max_length + 1) * 0.9
+                col_letter = get_column_letter(cell.column)
+                sheet.column_dimensions[col_letter].width = adjusted_width
+            else: 
+                sheet.column_dimensions[column_cells[0].column_letter].width = 22
         writer.save()
         with open(excel_file, 'rb') as file:
             excel_data = file.read()
