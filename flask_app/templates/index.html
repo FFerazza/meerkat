@@ -68,7 +68,7 @@
             return false;
         }
 
-        var pattern = /^[a-zA-Z0-9()]+$/;
+        var pattern = /^[a-zA-Z0-9() ]+$/;
       
         if (!pattern.test(searchQuery)) {
           alert('Please enter only alphanumeric characters and parentheses.');
