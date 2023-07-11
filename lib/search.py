@@ -1,5 +1,6 @@
 from scopus import *
 from springer import *
+from ieeexplore import *
 from os.path import exists
 import pandas as pd
 import seaborn as sns
@@ -8,17 +9,18 @@ from cosine_comparer import cosine_compare
 import argparse
 
 
-
 def gather_articles():
     scopus_articles = get_scopus_articles(search_string=search_string)
     springer_articles = get_springer_articles(search_string=search_string)
-    ieeexplore_articles = {}
+    ieeexplore_articles = get_ieee_articles(search_string=search_string)
+    print(f"Found {len(scopus_articles)} articles in Scopus")
+    print(f"Found {len(springer_articles)} articles in Springer")
+    print(f"Found {len(ieeexplore_articles)} articles in IEEE")
     merged_articles = {**scopus_articles, **springer_articles, **ieeexplore_articles}
     df = pd.DataFrame.from_dict(merged_articles, orient="index")
     df = transform_and_validate(df)
     df["URL"] = df["URL"].apply(lambda x: f'=HYPERLINK("{x}", "{x}")') #let's make it clickable
     df.to_excel("articles.xlsx", sheet_name=f"{search_string}-articles", index=False)
-    print(f"Wrote {len(scopus_articles)} articles to articles.xlsx")
 
 
 def transform_and_validate(dataframe, is_web_search=False):
@@ -59,8 +61,6 @@ def analyze_articles():
 
     list_of_categories = ["technical", "management", "review", "other"]
     list_of_definitions = ["defined", "undefined", "referenced"]
-    df["Category"] = choices(list_of_categories, k=len(df))
-    df["Definition"] = choices(list_of_definitions, k=len(df))
     pivot_table = df.pivot_table(
         index="Definition", columns="Date", aggfunc="size", fill_value=0
     )
@@ -105,4 +105,3 @@ if __name__ == '__main__':
         gather_articles()
     elif analyze and exists("articles.xlsx"):
         analyze_articles()
-
