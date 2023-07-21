@@ -28,7 +28,7 @@ def query():
 
     # Set the appropriate headers for Excel file download
     headers = {
-        'Content-Disposition': f'attachment; filename="articles.xlsx"',
+        'Content-Disposition': f'attachment; filename="results.xlsx"',
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     }
     
