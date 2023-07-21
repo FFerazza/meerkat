@@ -17,7 +17,7 @@ def convert_scopus_to_springer_query(search_string):
 
 
 def get_springer_articles(
-    search_string="devsecops",
+    search_string: str,
     starting_year: int = None,
     pagination_url=None,
     articles={},
