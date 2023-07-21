@@ -21,6 +21,7 @@ def get_springer_articles(
     starting_year: int = None,
     pagination_url=None,
     is_web_search: bool = False,
+    articles={},
 ) -> list[dict]:
     articles = {}
     if not pagination_url:
