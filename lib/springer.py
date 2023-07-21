@@ -20,10 +20,9 @@ def get_springer_articles(
     search_string: str,
     starting_year: int = None,
     pagination_url=None,
-    articles={},
     is_web_search: bool = False,
 ) -> list[dict]:
-    articles = articles
+    articles = {}
     if not pagination_url:
         if is_web_search:
             url = f'http://api.springernature.com/meta/v2/json?q={convert_scopus_to_springer_query(search_string)}&api_key={SPRINGER_API_KEY}'
