@@ -32,38 +32,5 @@ def generate_graphs(dataframe, graph_type=None, graph_title=None, graph_index=No
     plt.title(graph_title)
     plt.show()
 
-
-def category_definition_heatmap(dataframe):
-    pivot_table = dataframe.pivot_table(
-    index="Category", columns="Definition", aggfunc="size", fill_value=0
-    )
-    plt.figure(1)
-    sns.heatmap(pivot_table, annot=True, linewidth=0.5)
-    plt.show()
-    
-def category_heatmap(dataframe):
-    pivot_table = dataframe.pivot_table(
-    index="Category", columns="Date", aggfunc="size", fill_value=0
-    )
-    relative_pivot_table = pivot_table.div(pivot_table.sum(axis=0), axis=1)
-    plt.figure(1)
-    sns.heatmap(relative_pivot_table, annot=True, linewidth=0.5)
-    plt.show()
-    
-def definition_heatmap(dataframe):
-    pivot_table = dataframe.pivot_table(
-    index="Definition", columns="Date", aggfunc="size", fill_value=0
-    )
-    relative_pivot_table = pivot_table.div(pivot_table.sum(axis=0), axis=1)
-    plt.figure(1)
-    sns.heatmap(relative_pivot_table, annot=True, linewidth=0.5)
-    plt.show()    
-
-def date_histogram(dataframe):
-    plt.figure(1)
-    plt.locator_params(axis="x", integer=True)
-    sns.histplot(data=dataframe["Date"], discrete=True, kde=True)
-    plt.show()
-
 if __name__ == '__main__':
     analyze_articles()
