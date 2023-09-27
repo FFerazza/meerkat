@@ -1,3 +1,5 @@
 settings.py
 *.pyc
 articles.json
+articles.*
+launch.json
