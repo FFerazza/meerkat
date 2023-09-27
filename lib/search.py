@@ -5,8 +5,10 @@ from os.path import exists
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from analyze import analyze_articles
 from cosine_comparer import cosine_compare
 import argparse
+
 
 
 def gather_articles():
@@ -50,27 +52,6 @@ def transform_and_validate(dataframe, is_web_search=False):
     print("Dataframe shape: ", dataframe.shape)
     print(dataframe.dtypes)
     return dataframe
-
-
-def analyze_articles():
-    if not exists("articles.xlsx"):
-        print("No articles found, please run with -s <search_string>")
-        return
-
-    df = pd.read_excel("articles.xlsx")
-
-    list_of_categories = ["technical", "management", "review", "other"]
-    list_of_definitions = ["defined", "undefined", "referenced"]
-    pivot_table = df.pivot_table(
-        index="Definition", columns="Date", aggfunc="size", fill_value=0
-    )
-
-    plt.figure(1)
-    sns.heatmap(pivot_table, annot=True, linewidth=0.5)
-    plt.figure(2)
-    plt.locator_params(axis="x", integer=True)
-    sns.histplot(data=df["Date"], discrete=True, kde=True)
-    plt.show()
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
